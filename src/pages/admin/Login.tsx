@@ -8,9 +8,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@vinevid.com");
+  const [password, setPassword] = useState("vinevid#2025");
   const [loading, setLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(true);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,13 +19,43 @@ const AdminLogin = () => {
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      
-      if (error) {
-        toast.error(error.message);
+      if (isSignUp) {
+        // Create admin user
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/admin`
+          }
+        });
+        
+        if (error) {
+          toast.error(error.message);
+        } else {
+          toast.success("Admin account created! Please sign in now.");
+          setIsSignUp(false);
+        }
       } else {
-        toast.success("Signed in successfully");
-        navigate("/admin", { replace: true });
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        
+        if (error) {
+          toast.error(error.message);
+        } else {
+          // Try to promote user to admin if allowed
+          const { data: promoteResult, error: promoteError } = await supabase.rpc('promote_if_allowed');
+          
+          if (promoteError) {
+            console.warn('Admin promotion failed:', promoteError.message);
+          }
+          
+          if (promoteResult) {
+            toast.success("Signed in as admin successfully");
+            navigate("/admin", { replace: true });
+          } else {
+            toast.error("You don't have admin access");
+            await supabase.auth.signOut();
+          }
+        }
       }
     } catch (err) {
       toast.error("An error occurred during authentication");
@@ -43,7 +74,7 @@ const AdminLogin = () => {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Admin Login</CardTitle>
+            <CardTitle>{isSignUp ? "Create Admin Account" : "Admin Login"}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -67,8 +98,17 @@ const AdminLogin = () => {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Signing in..." : "Sign In"}
+                {loading ? (isSignUp ? "Creating Account..." : "Signing in...") : (isSignUp ? "Create Admin Account" : "Sign In")}
               </Button>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-sm text-primary hover:underline"
+                >
+                  {isSignUp ? "Already have an account? Sign in" : "Need to create an admin account? Sign up"}
+                </button>
+              </div>
             </form>
           </CardContent>
         </Card>
