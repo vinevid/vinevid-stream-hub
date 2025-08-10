@@ -1,0 +1,126 @@
+import { Helmet } from "react-helmet-async";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import ImageUploader from "@/components/admin/ImageUploader";
+import DownloadsEditor, { EpisodeItem } from "@/components/admin/DownloadsEditor";
+
+const fetchCategories = async () => {
+  const { data, error } = await supabase
+    .from("categories")
+    .select("id,name")
+    .order("position", { ascending: true });
+  if (error) throw error;
+  return data;
+};
+
+const NewVideo = () => {
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  const { data: cats } = useQuery({ queryKey: ["admin-cats"], queryFn: fetchCategories });
+  const [title, setTitle] = useState("");
+  const [poster, setPoster] = useState<string | null>(null);
+  const [description, setDescription] = useState("");
+  const [genre, setGenre] = useState("");
+  const [tags, setTags] = useState("");
+  const [year, setYear] = useState<number | "">("");
+  const [categoryId, setCategoryId] = useState<string | "">(cats?.[0]?.id ?? "");
+  const [downloads, setDownloads] = useState<EpisodeItem[]>([]);
+  const [trending, setTrending] = useState(false);
+  const [commentsEnabled, setCommentsEnabled] = useState(true);
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const { data: ins, error } = await supabase.from("videos").insert({
+        title,
+        poster_url: poster,
+        description,
+        genre: genre || null,
+        tags: tags ? tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+        year: year === "" ? null : Number(year),
+        category_id: categoryId as string,
+        trending,
+        comments_enabled: commentsEnabled,
+      }).select("id").maybeSingle();
+      if (error) throw error;
+      const vid = ins?.id as string;
+      if (downloads.length > 0) {
+        const payload = downloads.map((d, i) => ({
+          video_id: vid,
+          label: d.label,
+          url: d.url,
+          sort_order: i,
+        }));
+        const { error: e2 } = await supabase.from("video_downloads").insert(payload);
+        if (e2) throw e2;
+      }
+      return vid;
+    },
+    onSuccess: (vid) => {
+      qc.invalidateQueries({ queryKey: ["admin-videos"] });
+      navigate(`/admin/videos/${vid}/edit`);
+    },
+  });
+
+  return (
+    <>
+      <Helmet>
+        <title>Add New Video | VineVid</title>
+        <meta name="description" content="Admin: create a new video with episodes and metadata" />
+        <link rel="canonical" href={`${location.origin}/admin/videos/new`} />
+      </Helmet>
+      <Header />
+      <main className="container py-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Add New Video</h1>
+        </div>
+        <div className="grid gap-6 lg:grid-cols-3">
+          <Card className="lg:col-span-2">
+            <CardHeader><CardTitle>Details</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
+              <Textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <Input placeholder="Genre (or leave blank)" value={genre} onChange={(e) => setGenre(e.target.value)} />
+                <Input placeholder="Tags (comma separated)" value={tags} onChange={(e) => setTags(e.target.value)} />
+                <Input type="number" placeholder="Year" value={year} onChange={(e) => setYear(e.target.value === "" ? "" : Number(e.target.value))} />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+                <div>
+                  <label className="text-sm">Category</label>
+                  <select className="mt-1 w-full rounded-md border bg-background px-3 py-2" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+                    <option value="">Select...</option>
+                    {(cats ?? []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={trending} onChange={(e) => setTrending(e.target.checked)} /> Trending</label>
+                <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={commentsEnabled} onChange={(e) => setCommentsEnabled(e.target.checked)} /> Comments Enabled</label>
+              </div>
+              <DownloadsEditor items={downloads} onChange={setDownloads} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader><CardTitle>Poster</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              {poster && <img src={poster} alt="Poster preview" className="rounded-md border" />}
+              <ImageUploader bucket="posters" onUploaded={(url) => setPoster(url)} />
+            </CardContent>
+          </Card>
+        </div>
+        <div className="flex justify-end">
+          <Button onClick={() => save.mutate()} disabled={save.isPending || !title || !categoryId}>Save Video</Button>
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+};
+
+export default NewVideo;
