@@ -12,6 +12,9 @@ import FakeDownload from "./pages/FakeDownload";
 import { About, DMCA, Contact } from "./pages/StaticPages";
 import NotFound from "./pages/NotFound";
 import { ThemeProvider } from "./components/theme/ThemeProvider";
+import AdminLogin from "./pages/admin/Login";
+import AdminDashboard from "./pages/admin/Dashboard";
+import { RequireAdmin } from "./components/admin/RequireAdmin";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +35,8 @@ const App = () => (
               <Route path="/about" element={<About />} />
               <Route path="/dmca" element={<DMCA />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
