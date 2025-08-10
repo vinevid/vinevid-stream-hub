@@ -25,6 +25,7 @@ const LazyAdminComments = lazy(() => import("./pages/admin/Comments"));
 const LazyAdminSettings = lazy(() => import("./pages/admin/Settings"));
 const LazyAdminCategories = lazy(() => import("./pages/admin/Categories"));
 const LazyAdminHowTo = lazy(() => import("./pages/admin/HowToEditor"));
+const CategoryListing = lazy(() => import("./pages/CategoryListing"));
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
                 <Route path="/about" element={<About />} />
                 <Route path="/dmca" element={<DMCA />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/category/:category" element={<CategoryListing />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
                   <Route index element={<AdminDashboard />} />

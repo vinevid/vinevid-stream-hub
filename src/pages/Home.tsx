@@ -82,7 +82,7 @@ const Home = () => {
           <h2 id="categories" className="text-xl font-semibold">Categories</h2>
           <div className="flex flex-wrap gap-2">
             {categories.map((c) => (
-              <Link key={c} to={`/home?q=${encodeURIComponent(c)}`} className="px-3 py-1 rounded-full bg-accent text-accent-foreground hover:bg-primary/10">
+              <Link key={c} to={`/category/${c.toLowerCase()}`} className="px-3 py-1 rounded-full bg-accent text-accent-foreground hover:bg-primary/10">
                 {c}
               </Link>
             ))}
