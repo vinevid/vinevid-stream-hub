@@ -14,24 +14,21 @@ const AdminLogin = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let mounted = true;
+    
     // Check if user is already logged in
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+      if (session && mounted) {
         navigate("/admin", { replace: true });
       }
     };
 
     checkSession();
 
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        navigate("/admin", { replace: true });
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+    };
   }, [navigate]);
 
   const signIn = async (e: React.FormEvent) => {
@@ -43,7 +40,7 @@ const AdminLogin = () => {
       toast.error(error.message);
     } else {
       toast.success("Signed in");
-      // Navigation will happen automatically via auth state change listener
+      navigate("/admin", { replace: true });
     }
   };
 
