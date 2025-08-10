@@ -32,20 +32,8 @@ const AdminLogin = () => {
         if (error) {
           toast.error(error.message);
         } else {
-          // Try to promote user to admin if allowed
-          const { data: promoteResult, error: promoteError } = await supabase.rpc('promote_if_allowed');
-          
-          if (promoteError) {
-            console.warn('Admin promotion failed:', promoteError.message);
-          }
-          
-          if (promoteResult) {
-            toast.success("Admin account created successfully!");
-            navigate("/admin", { replace: true });
-          } else {
-            toast.error("Email not authorized for admin access");
-            await supabase.auth.signOut();
-          }
+          toast.success("Admin account created! Please check your email to confirm your account, then sign in.");
+          setIsSignUp(false);
         }
       } else {
         // Sign in existing user
