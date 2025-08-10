@@ -23,7 +23,21 @@ const AdminLogin = () => {
       if (error) {
         toast.error(error.message);
       } else {
-        toast.success("Signed in successfully");
+        // Try to promote user to admin if allowed
+        const { data: promoteResult, error: promoteError } = await supabase.rpc('promote_if_allowed');
+        
+        if (promoteError) {
+          console.warn('Admin promotion failed:', promoteError.message);
+        }
+        
+        if (promoteResult) {
+          toast.success("Signed in as admin successfully");
+        } else {
+          toast.error("You don't have admin access");
+          await supabase.auth.signOut();
+          return;
+        }
+        
         navigate("/admin", { replace: true });
       }
     } catch (err) {
