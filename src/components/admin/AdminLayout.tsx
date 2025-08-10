@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
@@ -6,10 +6,10 @@ import {
   Video, 
   MessageSquare, 
   Settings, 
-  FolderOpen, 
-  FileText, 
-  LogOut,
-  Menu
+  List,
+  HelpCircle,
+  Menu,
+  LogOut
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -19,21 +19,21 @@ const AdminLayout = () => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Error signing out");
-    } else {
-      toast.success("Signed out successfully");
-      navigate("/admin/login");
+    try {
+      await supabase.auth.signOut();
+      toast.success("Logged out successfully");
+      navigate("/admin/login", { replace: true });
+    } catch (error) {
+      toast.error("Error logging out");
     }
   };
 
   const navItems = [
-    { path: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+    { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/videos", label: "Videos", icon: Video },
-    { path: "/admin/categories", label: "Categories", icon: FolderOpen },
     { path: "/admin/comments", label: "Comments", icon: MessageSquare },
-    { path: "/admin/how-to", label: "How to Download", icon: FileText },
+    { path: "/admin/categories", label: "Categories", icon: List },
+    { path: "/admin/how-to", label: "How To", icon: HelpCircle },
     { path: "/admin/settings", label: "Settings", icon: Settings },
   ];
 
@@ -41,49 +41,52 @@ const AdminLayout = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
-              <Menu className="h-4 w-4" />
-            </Button>
-            <h1 className="text-xl font-bold text-primary">VineVid Admin</h1>
-          </div>
-          <Button variant="outline" onClick={handleLogout} className="gap-2">
-            <LogOut className="h-4 w-4" />
-            Sign Out
+        <div className="flex h-16 items-center px-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="mr-4"
+          >
+            <Menu className="h-4 w-4" />
           </Button>
+          
+          <h1 className="text-xl font-semibold">VineVid Admin</h1>
+          
+          <div className="ml-auto">
+            <Button variant="outline" size="sm" onClick={handleLogout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className={`border-r bg-card transition-all duration-300 ${
-          sidebarOpen ? "w-64" : "w-16"
-        }`}>
-          <nav className="p-4 space-y-2">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                end={item.exact}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`
-                }
-              >
-                <item.icon className="h-4 w-4 shrink-0" />
-                {sidebarOpen && <span>{item.label}</span>}
-              </NavLink>
-            ))}
-          </nav>
-        </aside>
+        {sidebarOpen && (
+          <aside className="w-64 border-r bg-card">
+            <nav className="p-4 space-y-2">
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  end={item.path === "/admin"}
+                  className={({ isActive }) =>
+                    `flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                    }`
+                  }
+                >
+                  <item.icon className="h-4 w-4 mr-3" />
+                  {item.label}
+                </NavLink>
+              ))}
+            </nav>
+          </aside>
+        )}
 
         {/* Main Content */}
         <main className="flex-1 p-6">

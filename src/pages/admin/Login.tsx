@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,50 +13,24 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    let mounted = true;
-    
-    // Check if user is already logged in
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session && mounted) {
-        navigate("/admin", { replace: true });
-      }
-    };
-
-    checkSession();
-
-    return () => {
-      mounted = false;
-    };
-  }, [navigate]);
-
   const signIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Signed in");
-      navigate("/admin", { replace: true });
+    
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success("Signed in successfully");
+        navigate("/admin", { replace: true });
+      }
+    } catch (err) {
+      toast.error("An error occurred during login");
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const signUp = async () => {
-    if (!email || !password) {
-      toast.error("Enter email and password first");
-      return;
-    }
-    const redirectUrl = `${window.location.origin}/admin`;
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: redirectUrl },
-    });
-    if (error) toast.error(error.message);
-    else toast.success("Check your email to confirm the account");
   };
 
   return (
@@ -75,11 +49,21 @@ const AdminLogin = () => {
             <form onSubmit={signIn} className="space-y-4">
               <div>
                 <label className="block text-sm mb-1">Email</label>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <Input 
+                  type="email" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
+                  required 
+                />
               </div>
               <div>
                 <label className="block text-sm mb-1">Password</label>
-                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <Input 
+                  type="password" 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  required 
+                />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Signing in..." : "Sign In"}
