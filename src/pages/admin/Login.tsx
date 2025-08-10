@@ -67,13 +67,6 @@ const AdminLogin = () => {
                 {loading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
-            <div className="mt-4 text-xs text-muted-foreground space-y-2">
-              <p>
-                No public registration. If this is your first setup, enter the admin email and password and click
-                "Create Admin Account". Only the whitelisted email will gain admin access.
-              </p>
-              <Button variant="outline" className="w-full" onClick={signUp}>Create Admin Account</Button>
-            </div>
           </CardContent>
         </Card>
       </div>

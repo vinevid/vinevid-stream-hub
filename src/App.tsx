@@ -13,10 +13,11 @@ import FakeDownload from "./pages/FakeDownload";
 import { About, DMCA, Contact } from "./pages/StaticPages";
 import NotFound from "./pages/NotFound";
 import { ThemeProvider } from "./components/theme/ThemeProvider";
-import AdminLogin from "./pages/admin/Login";
-import AdminDashboard from "./pages/admin/Dashboard";
 import { RequireAdmin } from "./components/admin/RequireAdmin";
 
+const AdminLogin = lazy(() => import("./pages/admin/Login"));
+const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
+const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
 const LazyAdminVideosList = lazy(() => import("./pages/admin/VideosList"));
 const LazyAdminNewVideo = lazy(() => import("./pages/admin/NewVideo"));
 const LazyAdminEditVideo = lazy(() => import("./pages/admin/EditVideo"));
@@ -46,14 +47,16 @@ const App = () => (
                 <Route path="/dmca" element={<DMCA />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
-                <Route path="/admin/videos" element={<RequireAdmin><LazyAdminVideosList /></RequireAdmin>} />
-                <Route path="/admin/videos/new" element={<RequireAdmin><LazyAdminNewVideo /></RequireAdmin>} />
-                <Route path="/admin/videos/:id/edit" element={<RequireAdmin><LazyAdminEditVideo /></RequireAdmin>} />
-                <Route path="/admin/comments" element={<RequireAdmin><LazyAdminComments /></RequireAdmin>} />
-                <Route path="/admin/settings" element={<RequireAdmin><LazyAdminSettings /></RequireAdmin>} />
-                <Route path="/admin/categories" element={<RequireAdmin><LazyAdminCategories /></RequireAdmin>} />
-                <Route path="/admin/how-to" element={<RequireAdmin><LazyAdminHowTo /></RequireAdmin>} />
+                <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="videos" element={<LazyAdminVideosList />} />
+                  <Route path="videos/new" element={<LazyAdminNewVideo />} />
+                  <Route path="videos/:id/edit" element={<LazyAdminEditVideo />} />
+                  <Route path="comments" element={<LazyAdminComments />} />
+                  <Route path="settings" element={<LazyAdminSettings />} />
+                  <Route path="categories" element={<LazyAdminCategories />} />
+                  <Route path="how-to" element={<LazyAdminHowTo />} />
+                </Route>
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
