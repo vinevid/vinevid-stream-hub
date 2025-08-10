@@ -33,9 +33,8 @@ const VideoDetails = () => {
             <h1 className="text-2xl font-bold">{v.title}</h1>
             <p className="text-muted-foreground mt-2">{v.description}</p>
             <div className="mt-4 text-sm text-muted-foreground">{v.category} · {v.year} · {v.tags.join(", ")}</div>
-            <div className="mt-6 flex gap-3">
-              <Button variant="default" onClick={onDownload}>Download</Button>
-              <Button variant="secondary" onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}>Mirror Links</Button>
+            <div className="mt-6">
+              <Button variant="default" onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}>Episode List</Button>
             </div>
           </div>
         </section>
@@ -57,6 +56,23 @@ const VideoDetails = () => {
         )}
 
         <section>
+          <h2 className="text-xl font-semibold mb-4">Episode List</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 16 }, (_, i) => (
+              <Button 
+                key={i + 1} 
+                variant="outline" 
+                className="h-auto p-4 flex flex-col items-center gap-2"
+                onClick={() => window.open(`https://exe.io/episode-${i + 1}`, '_blank')}
+              >
+                <span className="font-medium">Episode {i + 1}</span>
+                <span className="text-xs text-muted-foreground">Click to Download</span>
+              </Button>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-10">
           <Comments videoId={v.id} />
         </section>
       </main>
