@@ -1,22 +1,47 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { videos, categories } from "@/data/videos";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-function useQuery() {
+function useQueryParams() {
   const { search } = useLocation();
   return new URLSearchParams(search);
 }
 
+const fetchVideos = async () => {
+  const { data, error } = await supabase
+    .from("videos")
+    .select(`
+      *,
+      categories(name)
+    `)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data;
+};
+
+const fetchCategories = async () => {
+  const { data, error } = await supabase
+    .from("categories")
+    .select("*")
+    .eq("visible", true)
+    .order("position");
+  if (error) throw error;
+  return data;
+};
+
 const Home = () => {
-  const q = useQuery().get("q")?.toLowerCase() ?? "";
-  const latest = [...videos].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+  const q = useQueryParams().get("q")?.toLowerCase() ?? "";
+  const { data: videos = [] } = useQuery({ queryKey: ["videos"], queryFn: fetchVideos });
+  const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: fetchCategories });
+  
   const filtered = q
-    ? latest.filter((v) => v.title.toLowerCase().includes(q) || v.tags.join(" ").includes(q))
-    : latest;
-  const trending = latest.filter((v) => v.trending);
+    ? videos.filter((v) => v.title.toLowerCase().includes(q) || (v.tags || []).join(" ").includes(q))
+    : videos;
+  const trending = videos.filter((v) => v.trending);
 
   return (
     <>
@@ -33,20 +58,20 @@ const Home = () => {
             {filtered.map((v) => (
               <Link key={v.id} to={`/video/${v.id}`} className="group">
                 <Card className="h-full overflow-hidden">
-                  <div className="aspect-[3/2] overflow-hidden">
-                    <img
-                      src={v.image}
-                      alt={`${v.title} poster`}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                  </div>
-                  <CardHeader>
-                    <CardTitle className="text-base">{v.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
-                    <span>{v.category}</span> · <span>{v.year}</span>
-                  </CardContent>
+                   <div className="aspect-[3/2] overflow-hidden">
+                     <img
+                       src={v.poster_url || "https://images.unsplash.com/photo-1534237710431-e2fc698436d0?q=80&w=1200&auto=format&fit=crop"}
+                       alt={`${v.title} poster`}
+                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                       loading="lazy"
+                     />
+                   </div>
+                   <CardHeader>
+                     <CardTitle className="text-base">{v.title}</CardTitle>
+                   </CardHeader>
+                   <CardContent className="text-sm text-muted-foreground">
+                     <span>{v.categories?.name}</span> · <span>{v.year}</span>
+                   </CardContent>
                 </Card>
               </Link>
             ))}
@@ -60,14 +85,14 @@ const Home = () => {
               {trending.map((v) => (
                 <Link key={v.id} to={`/video/${v.id}`} className="group">
                   <Card className="h-full overflow-hidden border-primary/30">
-                    <div className="aspect-[3/2] overflow-hidden">
-                      <img
-                        src={v.image}
-                        alt={`${v.title} poster`}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        loading="lazy"
-                      />
-                    </div>
+                     <div className="aspect-[3/2] overflow-hidden">
+                       <img
+                         src={v.poster_url || "https://images.unsplash.com/photo-1534237710431-e2fc698436d0?q=80&w=1200&auto=format&fit=crop"}
+                         alt={`${v.title} poster`}
+                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                         loading="lazy"
+                       />
+                     </div>
                     <CardHeader>
                       <CardTitle className="text-base">{v.title}</CardTitle>
                     </CardHeader>
@@ -80,13 +105,13 @@ const Home = () => {
 
         <section aria-labelledby="categories" className="space-y-4">
           <h2 id="categories" className="text-xl font-semibold">Categories</h2>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((c) => (
-              <Link key={c} to={`/category/${c.toLowerCase()}`} className="px-3 py-1 rounded-full bg-accent text-accent-foreground hover:bg-primary/10">
-                {c}
-              </Link>
-            ))}
-          </div>
+           <div className="flex flex-wrap gap-2">
+             {categories.map((c) => (
+               <Link key={c.id} to={`/category/${c.name.toLowerCase()}`} className="px-3 py-1 rounded-full bg-accent text-accent-foreground hover:bg-primary/10">
+                 {c.name}
+               </Link>
+             ))}
+           </div>
         </section>
       </main>
       <Footer />

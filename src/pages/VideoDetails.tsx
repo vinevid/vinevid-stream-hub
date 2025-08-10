@@ -1,66 +1,121 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { videos } from "@/data/videos";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Comments } from "@/sections/Comments";
 
+const fetchVideo = async (id: string) => {
+  const { data, error } = await supabase
+    .from("videos")
+    .select(`
+      *,
+      categories(name),
+      video_downloads(*)
+    `)
+    .eq("id", id)
+    .single();
+  if (error) throw error;
+  return data;
+};
+
+const fetchRelatedVideos = async (categoryId: string, videoId: string) => {
+  const { data, error } = await supabase
+    .from("videos")
+    .select(`
+      *,
+      categories(name)
+    `)
+    .eq("category_id", categoryId)
+    .neq("id", videoId)
+    .limit(4);
+  if (error) throw error;
+  return data;
+};
+
 const VideoDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const v = videos.find((x) => x.id === id);
-  if (!v) return null;
+  
+  const { data: video, isLoading } = useQuery({
+    queryKey: ["video", id],
+    queryFn: () => fetchVideo(id!),
+    enabled: !!id,
+  });
 
-  const onDownload = () => {
-    navigate(`/download/${v.id}?target=${encodeURIComponent(v.shortLink)}`);
+  const { data: relatedVideos = [] } = useQuery({
+    queryKey: ["related-videos", video?.category_id, id],
+    queryFn: () => fetchRelatedVideos(video!.category_id, id!),
+    enabled: !!video?.category_id && !!id,
+  });
+
+  const onDownload = (downloadUrl: string) => {
+    window.open(downloadUrl, '_blank');
   };
 
-  const related = videos.filter((x) => x.category === v.category && x.id !== v.id).slice(0, 4);
+  if (isLoading) return <div>Loading...</div>;
+  if (!video) return <div>Video not found</div>;
 
   return (
     <>
       <Helmet>
-        <title>{`${v.title} | VineVid`}</title>
-        <meta name="description" content={v.description} />
-        <link rel="canonical" href={`${location.origin}/video/${v.id}`} />
+        <title>{video.title} | VineVid</title>
+        <meta name="description" content={video.description || `Watch ${video.title} - ${video.categories?.name} ${video.year}`} />
+        <link rel="canonical" href={`${location.origin}/video/${video.id}`} />
       </Helmet>
       <Header />
       <main className="container py-8 space-y-10">
         <section className="grid gap-8 lg:grid-cols-[1fr,2fr] items-start">
-          <img src={v.image} alt={`${v.title} poster`} className="w-full max-w-sm rounded-lg border" loading="lazy" />
+          <img 
+            src={video.poster_url || "https://images.unsplash.com/photo-1534237710431-e2fc698436d0?q=80&w=1200&auto=format&fit=crop"} 
+            alt={`${video.title} poster`} 
+            className="w-full max-w-sm rounded-lg border" 
+            loading="lazy" 
+          />
           <div>
-            <h1 className="text-2xl font-bold">{v.title}</h1>
-            <p className="text-muted-foreground mt-2">{v.description}</p>
-            <div className="mt-4 text-sm text-muted-foreground">{v.category} · {v.year} · {v.tags.join(", ")}</div>
+            <h1 className="text-2xl font-bold">{video.title}</h1>
+            <p className="text-muted-foreground mt-2">{video.description}</p>
+            <div className="mt-4 text-sm text-muted-foreground">
+              {video.categories?.name} · {video.year} · {(video.tags || []).join(", ")}
+            </div>
           </div>
         </section>
 
-        <section>
-          <h2 className="text-xl font-semibold mb-4">Episode List</h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 16 }, (_, i) => (
-              <Button 
-                key={i + 1} 
-                variant="default" 
-                className="h-auto p-4 flex flex-col items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white"
-                onClick={() => window.open(`https://exe.io/episode-${i + 1}`, '_blank')}
-              >
-                <span className="font-medium">Episode {i + 1}</span>
-                <span className="text-xs opacity-90">Click to Download</span>
-              </Button>
-            ))}
-          </div>
-        </section>
+        {video.video_downloads && video.video_downloads.length > 0 && (
+          <section>
+            <h2 className="text-xl font-semibold mb-4">Episode List</h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {video.video_downloads
+                .sort((a, b) => a.sort_order - b.sort_order)
+                .map((download) => (
+                  <Button 
+                    key={download.id} 
+                    variant="default" 
+                    className="h-auto p-4 flex flex-col items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white"
+                    onClick={() => onDownload(download.url)}
+                  >
+                    <span className="font-medium">{download.label}</span>
+                    <span className="text-xs opacity-90">Click to Download</span>
+                  </Button>
+                ))}
+            </div>
+          </section>
+        )}
 
-        {related.length > 0 && (
+        {relatedVideos.length > 0 && (
           <section>
             <h2 className="text-xl font-semibold mb-4">More Like This</h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {related.map((r) => (
+              {relatedVideos.map((r) => (
                 <Link to={`/video/${r.id}`} key={r.id} className="group">
                   <div className="rounded-lg overflow-hidden border">
-                    <img src={r.image} alt={`${r.title} poster`} className="h-40 w-full object-cover group-hover:scale-105 transition-transform" />
+                    <img 
+                      src={r.poster_url || "https://images.unsplash.com/photo-1534237710431-e2fc698436d0?q=80&w=1200&auto=format&fit=crop"} 
+                      alt={`${r.title} poster`} 
+                      className="h-40 w-full object-cover group-hover:scale-105 transition-transform" 
+                    />
                   </div>
                   <p className="mt-2 text-sm">{r.title}</p>
                 </Link>
@@ -69,9 +124,11 @@ const VideoDetails = () => {
           </section>
         )}
 
-        <section className="mt-10">
-          <Comments videoId={v.id} />
-        </section>
+        {video.comments_enabled && (
+          <section className="mt-10">
+            <Comments videoId={video.id} />
+          </section>
+        )}
       </main>
       <Footer />
     </>

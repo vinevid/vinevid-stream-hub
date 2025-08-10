@@ -36,7 +36,7 @@ export const Header = () => {
           <Button type="submit" variant="default">Search</Button>
         </form>
         <nav className="flex items-center gap-2">
-          <Link to="/how-to-download" className="text-sm text-muted-foreground hover:text-foreground">How to Download</Link>
+          <Link to="/how-to-download" className="hidden sm:block text-sm text-muted-foreground hover:text-foreground">How to Download</Link>
           <ThemeToggle />
         </nav>
       </div>
