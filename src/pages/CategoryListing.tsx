@@ -12,7 +12,8 @@ const fetchVideosByCategory = async (categoryName: string) => {
     .from("videos")
     .select(`
       *,
-      categories!inner(name)
+      categories!inner(name),
+      video_downloads(label, sort_order)
     `)
     .ilike("categories.name", categoryName)
     .order("created_at", { ascending: false });
@@ -27,6 +28,13 @@ const CategoryListing = () => {
     queryFn: () => fetchVideosByCategory(category!),
     enabled: !!category,
   });
+
+  // Get latest episode for each video
+  const getLatestEpisode = (video: any) => {
+    if (!video.video_downloads || video.video_downloads.length === 0) return null;
+    const sortedEpisodes = video.video_downloads.sort((a: any, b: any) => b.sort_order - a.sort_order);
+    return sortedEpisodes[0];
+  };
 
   const categoryTitle = category === "kdrama" ? "KDrama" : category === "cdrama" ? "CDrama" : category;
 
@@ -49,31 +57,39 @@ const CategoryListing = () => {
           
           {filtered.length > 0 ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {filtered.map((video) => (
-                <Link key={video.id} to={`/video/${video.id}`} className="group">
-                  <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="aspect-[3/2] overflow-hidden">
-                      <img
-                        src={video.poster_url || "https://images.unsplash.com/photo-1534237710431-e2fc698436d0?q=80&w=1200&auto=format&fit=crop"}
-                        alt={`${video.title} poster`}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        loading="lazy"
-                      />
-                    </div>
-                    <CardHeader>
-                      <CardTitle className="text-base line-clamp-2">{video.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm text-muted-foreground">
-                      <span>{video.categories?.name}</span> · <span>{video.year}</span>
-                      <div className="mt-1 flex flex-wrap gap-1">
-                        {(video.tags || []).map((tag) => (
-                          <span key={tag} className="px-1 py-0.5 bg-muted rounded text-xs">{tag}</span>
-                        ))}
+              {filtered.map((video) => {
+                const latestEpisode = getLatestEpisode(video);
+                return (
+                  <Link key={video.id} to={`/video/${video.id}`} className="group">
+                    <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow">
+                      <div className="aspect-[3/2] overflow-hidden relative">
+                        <img
+                          src={video.poster_url || "https://images.unsplash.com/photo-1534237710431-e2fc698436d0?q=80&w=1200&auto=format&fit=crop"}
+                          alt={`${video.title} poster`}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                        {latestEpisode && (
+                          <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
+                            {latestEpisode.label}
+                          </div>
+                        )}
                       </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
+                      <CardHeader>
+                        <CardTitle className="text-base line-clamp-2">{video.title}</CardTitle>
+                      </CardHeader>
+                      <CardContent className="text-sm text-muted-foreground">
+                        <span>{video.categories?.name}</span> · <span>{video.year}</span>
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {(video.tags || []).map((tag) => (
+                            <span key={tag} className="px-1 py-0.5 bg-muted rounded text-xs">{tag}</span>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12">
