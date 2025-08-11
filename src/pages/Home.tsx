@@ -50,8 +50,8 @@ const Home = () => {
     ? videos.filter((v) => v.title.toLowerCase().includes(q) || (v.tags || []).join(" ").includes(q))
     : videos;
   const trending = videos.filter((v) => v.trending);
-  const topCdrama = videos.filter((v) => v.categories?.name === "Cdrama").slice(0, 8);
-  const topKdrama = videos.filter((v) => v.categories?.name === "Kdrama").slice(0, 8);
+  const topCdrama = videos.filter((v) => v.top_cdrama);
+  const topKdrama = videos.filter((v) => v.top_kdrama);
 
   return (
     <>

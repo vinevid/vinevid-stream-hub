@@ -219,6 +219,8 @@ export type Database = {
           poster_url: string | null
           tags: string[] | null
           title: string
+          top_cdrama: boolean
+          top_kdrama: boolean
           trending: boolean
           updated_at: string
           year: number | null
@@ -233,6 +235,8 @@ export type Database = {
           poster_url?: string | null
           tags?: string[] | null
           title: string
+          top_cdrama?: boolean
+          top_kdrama?: boolean
           trending?: boolean
           updated_at?: string
           year?: number | null
@@ -247,6 +251,8 @@ export type Database = {
           poster_url?: string | null
           tags?: string[] | null
           title?: string
+          top_cdrama?: boolean
+          top_kdrama?: boolean
           trending?: boolean
           updated_at?: string
           year?: number | null

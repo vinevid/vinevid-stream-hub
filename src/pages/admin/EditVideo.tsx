@@ -36,6 +36,8 @@ const EditVideo = () => {
   const [downloads, setDownloads] = useState<EpisodeItem[]>([]);
   const [trending, setTrending] = useState(false);
   const [commentsEnabled, setCommentsEnabled] = useState(true);
+  const [topCdrama, setTopCdrama] = useState(false);
+  const [topKdrama, setTopKdrama] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -50,6 +52,8 @@ const EditVideo = () => {
         setCategoryId(data.category_id ?? "");
         setTrending(data.trending ?? false);
         setCommentsEnabled(data.comments_enabled ?? true);
+        setTopCdrama(data.top_cdrama ?? false);
+        setTopKdrama(data.top_kdrama ?? false);
       }
       const { data: dls } = await supabase
         .from("video_downloads")
@@ -73,6 +77,8 @@ const EditVideo = () => {
         category_id: categoryId as string,
         trending,
         comments_enabled: commentsEnabled,
+        top_cdrama: topCdrama,
+        top_kdrama: topKdrama,
       }).eq("id", id);
       if (error) throw error;
       // Upsert downloads: simplest approach - delete then insert current list
@@ -128,6 +134,10 @@ const EditVideo = () => {
                 </div>
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={trending} onChange={(e) => setTrending(e.target.checked)} /> Trending</label>
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={commentsEnabled} onChange={(e) => setCommentsEnabled(e.target.checked)} /> Comments Enabled</label>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+                <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={topCdrama} onChange={(e) => setTopCdrama(e.target.checked)} /> Top CDrama</label>
+                <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={topKdrama} onChange={(e) => setTopKdrama(e.target.checked)} /> Top KDrama</label>
               </div>
               <DownloadsEditor items={downloads} onChange={setDownloads} />
             </CardContent>
