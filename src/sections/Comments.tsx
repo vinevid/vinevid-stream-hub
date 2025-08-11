@@ -141,7 +141,7 @@ const CommentItem = ({ comment }: { comment: any }) => {
             <div key={reply.id} className="rounded-md border p-3 bg-muted/50">
               <div className="text-sm font-medium">
                 {reply.is_admin_reply ? (
-                  <span className="text-primary font-bold">{reply.name} (Admin)</span>
+                  <span className="text-primary font-bold">{reply.name} (VineVid)</span>
                 ) : (
                   reply.name
                 )}

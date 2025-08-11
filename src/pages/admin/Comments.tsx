@@ -55,7 +55,7 @@ const AdminComments = () => {
       const { error } = await supabase.from("comments").insert({
         parent_id: parentId,
         video_id: videoId,
-        name: "Admin",
+        name: "VineVid",
         content: content.trim(),
         status: "approved",
         is_admin_reply: true,
@@ -142,7 +142,7 @@ const CommentCard = ({
               <div key={reply.id} className="bg-muted/50 p-3 rounded">
                 <div className="text-sm font-medium">
                   {reply.is_admin_reply ? (
-                    <span className="text-primary font-bold">{reply.name} (Admin)</span>
+                    <span className="text-primary font-bold">{reply.name} (VineVid)</span>
                   ) : (
                     reply.name
                   )}
