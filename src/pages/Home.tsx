@@ -50,6 +50,8 @@ const Home = () => {
     ? videos.filter((v) => v.title.toLowerCase().includes(q) || (v.tags || []).join(" ").includes(q))
     : videos;
   const trending = videos.filter((v) => v.trending);
+  const topCdrama = videos.filter((v) => v.categories?.name === "Cdrama").slice(0, 8);
+  const topKdrama = videos.filter((v) => v.categories?.name === "Kdrama").slice(0, 8);
 
   return (
     <>
@@ -119,6 +121,78 @@ const Home = () => {
                       <CardHeader>
                         <CardTitle className="text-base">{v.title}</CardTitle>
                       </CardHeader>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {topCdrama.length > 0 && (
+          <section aria-labelledby="top-cdrama" className="space-y-4">
+            <h2 id="top-cdrama" className="text-xl font-semibold">Top CDrama</h2>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {topCdrama.map((v) => {
+                const latestEpisode = getLatestEpisode(v);
+                return (
+                  <Link key={v.id} to={`/video/${v.id}`} className="group">
+                    <Card className="h-full overflow-hidden">
+                       <div className="aspect-[3/2] overflow-hidden relative">
+                         <img
+                           src={v.poster_url || "https://images.unsplash.com/photo-1534237710431-e2fc698436d0?q=80&w=1200&auto=format&fit=crop"}
+                           alt={`${v.title} poster`}
+                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                           loading="lazy"
+                         />
+                         {latestEpisode && (
+                           <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
+                             {latestEpisode.label}
+                           </div>
+                         )}
+                       </div>
+                       <CardHeader>
+                         <CardTitle className="text-base">{v.title}</CardTitle>
+                       </CardHeader>
+                       <CardContent className="text-sm text-muted-foreground">
+                         <span>{v.categories?.name}</span> · <span>{v.year}</span>
+                       </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {topKdrama.length > 0 && (
+          <section aria-labelledby="top-kdrama" className="space-y-4">
+            <h2 id="top-kdrama" className="text-xl font-semibold">Top KDrama</h2>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {topKdrama.map((v) => {
+                const latestEpisode = getLatestEpisode(v);
+                return (
+                  <Link key={v.id} to={`/video/${v.id}`} className="group">
+                    <Card className="h-full overflow-hidden">
+                       <div className="aspect-[3/2] overflow-hidden relative">
+                         <img
+                           src={v.poster_url || "https://images.unsplash.com/photo-1534237710431-e2fc698436d0?q=80&w=1200&auto=format&fit=crop"}
+                           alt={`${v.title} poster`}
+                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                           loading="lazy"
+                         />
+                         {latestEpisode && (
+                           <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
+                             {latestEpisode.label}
+                           </div>
+                         )}
+                       </div>
+                       <CardHeader>
+                         <CardTitle className="text-base">{v.title}</CardTitle>
+                       </CardHeader>
+                       <CardContent className="text-sm text-muted-foreground">
+                         <span>{v.categories?.name}</span> · <span>{v.year}</span>
+                       </CardContent>
                     </Card>
                   </Link>
                 );
