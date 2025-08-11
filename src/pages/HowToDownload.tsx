@@ -6,7 +6,7 @@ import { CheckCircle2, Download, Timer, ScanLine } from "lucide-react";
 const steps = [
   { icon: Download, title: "Click your episode", desc: "Open the movie or episode page you want." },
   { icon: Timer, title: "Wait for secure link", desc: "We prepare a safe, fast download URL." },
-  { icon: ScanLine, title: "Skip ad / countdown", desc: "Short wait to keep content free for everyone." },
+  { icon: ScanLine, title: "Wait for the countdown", desc: "Short wait to keep content free for everyone." },
   { icon: CheckCircle2, title: "Download starts", desc: "Your file downloads automatically." },
 ];
 

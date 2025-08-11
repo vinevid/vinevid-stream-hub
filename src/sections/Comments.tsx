@@ -33,7 +33,7 @@ export const Comments = ({ videoId }: { videoId: string }) => {
           video_id: videoId,
           name: name.trim(),
           content: content.trim(),
-          status: "pending",
+          status: "approved", // Auto-approve all comments
         });
       
       if (error) throw error;
@@ -41,7 +41,7 @@ export const Comments = ({ videoId }: { videoId: string }) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", videoId] });
       setText("");
-      setError("Comment submitted! It will appear after admin approval.");
+      setError("Comment posted successfully!");
     },
     onError: (error) => {
       setError("Failed to submit comment. Please try again.");
