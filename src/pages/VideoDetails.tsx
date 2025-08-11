@@ -52,7 +52,9 @@ const VideoDetails = () => {
   });
 
   const onDownload = (downloadUrl: string) => {
-    window.open(downloadUrl, '_blank');
+    // Use fake download page with the actual URL as target
+    const fakeDownloadUrl = `/download/${id}?target=${encodeURIComponent(downloadUrl)}`;
+    window.open(fakeDownloadUrl, '_blank');
   };
 
   if (isLoading) return <div>Loading...</div>;

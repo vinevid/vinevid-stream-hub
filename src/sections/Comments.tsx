@@ -1,38 +1,70 @@
 import { useMemo, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+const fetchComments = async (videoId: string) => {
+  const { data, error } = await supabase
+    .from("comments")
+    .select("*")
+    .eq("video_id", videoId)
+    .eq("status", "approved")
+    .order("created_at", { ascending: false });
+  
+  if (error) throw error;
+  return data || [];
+};
 
 export const Comments = ({ videoId }: { videoId: string }) => {
-  const storageKey = `vinevid_comments_${videoId}`;
+  const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [items, setItems] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(storageKey) || "[]") as Array<{name: string; text: string; at: number}>;
-    } catch {
-      return [] as Array<{name: string; text: string; at: number}>;
-    }
+  
+  const { data: comments = [] } = useQuery({
+    queryKey: ["comments", videoId],
+    queryFn: () => fetchComments(videoId),
+  });
+
+  const addComment = useMutation({
+    mutationFn: async ({ name, content }: { name: string; content: string }) => {
+      const { error } = await supabase
+        .from("comments")
+        .insert({
+          video_id: videoId,
+          name: name.trim(),
+          content: content.trim(),
+          status: "pending",
+        });
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", videoId] });
+      setText("");
+      setError("Comment submitted! It will appear after admin approval.");
+    },
+    onError: (error) => {
+      setError("Failed to submit comment. Please try again.");
+      console.error("Comment submission error:", error);
+    },
   });
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const lastAt = Number(localStorage.getItem("vinevid_last_comment_at") || 0);
-    if (Date.now() - lastAt < 20_000) {
-      setError("Please wait a few seconds before posting again.");
-      return;
-    }
+    
     if (!name.trim() || !text.trim()) {
       setError("Name and comment are required.");
       return;
     }
-    const next = [{ name: name.trim(), text: text.trim(), at: Date.now() }, ...items].slice(0, 100);
-    setItems(next);
-    localStorage.setItem(storageKey, JSON.stringify(next));
-    localStorage.setItem("vinevid_last_comment_at", String(Date.now()));
-    setText("");
+    
+    if (addComment.isPending) {
+      setError("Please wait...");
+      return;
+    }
+    
+    addComment.mutate({ name, content: text });
   };
-
-  const list = useMemo(() => items.sort((a, b) => b.at - a.at), [items]);
 
   return (
     <div className="max-w-2xl">
@@ -61,13 +93,18 @@ export const Comments = ({ videoId }: { videoId: string }) => {
       </form>
 
       <ul className="mt-6 space-y-4">
-        {list.map((c, idx) => (
-          <li key={idx} className="rounded-md border p-3">
-            <div className="text-sm font-medium">{c.name} <span className="text-muted-foreground">· {new Date(c.at).toLocaleString()}</span></div>
-            <p className="text-sm mt-1">{c.text}</p>
+        {comments.map((c) => (
+          <li key={c.id} className="rounded-md border p-3">
+            <div className="text-sm font-medium">
+              {c.name} 
+              <span className="text-muted-foreground">
+                · {new Date(c.created_at).toLocaleString()}
+              </span>
+            </div>
+            <p className="text-sm mt-1">{c.content}</p>
           </li>
         ))}
-        {list.length === 0 && (
+        {comments.length === 0 && (
           <li className="text-sm text-muted-foreground">Be the first to comment.</li>
         )}
       </ul>

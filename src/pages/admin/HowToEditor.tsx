@@ -21,9 +21,18 @@ const HowToEditor = () => {
   const save = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("how_to_content").update({ content }).eq("id", 1);
-      if (error) throw error;
+      if (error) {
+        console.error("Save error:", error);
+        throw error;
+      }
     },
-    onSuccess: () => refetch(),
+    onSuccess: () => {
+      console.log("Save successful");
+      refetch();
+    },
+    onError: (error) => {
+      console.error("Save mutation error:", error);
+    },
   });
 
   return (
