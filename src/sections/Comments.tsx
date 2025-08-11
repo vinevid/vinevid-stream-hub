@@ -8,7 +8,20 @@ const fetchComments = async (videoId: string) => {
     .select("*")
     .eq("video_id", videoId)
     .eq("status", "approved")
+    .is("parent_id", null) // Only get top-level comments
     .order("created_at", { ascending: false });
+  
+  if (error) throw error;
+  return data || [];
+};
+
+const fetchReplies = async (parentId: string) => {
+  const { data, error } = await supabase
+    .from("comments")
+    .select("*")
+    .eq("parent_id", parentId)
+    .eq("status", "approved")
+    .order("created_at", { ascending: true }); // Replies in chronological order
   
   if (error) throw error;
   return data || [];
@@ -94,20 +107,53 @@ export const Comments = ({ videoId }: { videoId: string }) => {
 
       <ul className="mt-6 space-y-4">
         {comments.map((c) => (
-          <li key={c.id} className="rounded-md border p-3">
-            <div className="text-sm font-medium">
-              {c.name} 
-              <span className="text-muted-foreground">
-                · {new Date(c.created_at).toLocaleString()}
-              </span>
-            </div>
-            <p className="text-sm mt-1">{c.content}</p>
-          </li>
+          <CommentItem key={c.id} comment={c} />
         ))}
         {comments.length === 0 && (
           <li className="text-sm text-muted-foreground">Be the first to comment.</li>
         )}
       </ul>
     </div>
+  );
+};
+
+const CommentItem = ({ comment }: { comment: any }) => {
+  const { data: replies = [] } = useQuery({
+    queryKey: ["replies", comment.id],
+    queryFn: () => fetchReplies(comment.id),
+  });
+
+  return (
+    <li className="space-y-3">
+      <div className="rounded-md border p-3">
+        <div className="text-sm font-medium">
+          {comment.name} 
+          <span className="text-muted-foreground">
+            · {new Date(comment.created_at).toLocaleString()}
+          </span>
+        </div>
+        <p className="text-sm mt-1">{comment.content}</p>
+      </div>
+      
+      {replies.length > 0 && (
+        <div className="ml-6 space-y-2">
+          {replies.map((reply) => (
+            <div key={reply.id} className="rounded-md border p-3 bg-muted/50">
+              <div className="text-sm font-medium">
+                {reply.is_admin_reply ? (
+                  <span className="text-primary font-bold">{reply.name} (Admin)</span>
+                ) : (
+                  reply.name
+                )}
+                <span className="text-muted-foreground">
+                  · {new Date(reply.created_at).toLocaleString()}
+                </span>
+              </div>
+              <p className="text-sm mt-1">{reply.content}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </li>
   );
 };

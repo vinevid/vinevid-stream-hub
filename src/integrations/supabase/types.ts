@@ -47,7 +47,9 @@ export type Database = {
           created_at: string
           id: string
           ip_hash: string | null
+          is_admin_reply: boolean | null
           name: string
+          parent_id: string | null
           status: Database["public"]["Enums"]["comment_status"]
           video_id: string
         }
@@ -56,7 +58,9 @@ export type Database = {
           created_at?: string
           id?: string
           ip_hash?: string | null
+          is_admin_reply?: boolean | null
           name: string
+          parent_id?: string | null
           status?: Database["public"]["Enums"]["comment_status"]
           video_id: string
         }
@@ -65,11 +69,20 @@ export type Database = {
           created_at?: string
           id?: string
           ip_hash?: string | null
+          is_admin_reply?: boolean | null
           name?: string
+          parent_id?: string | null
           status?: Database["public"]["Enums"]["comment_status"]
           video_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "comments_video_id_fkey"
             columns: ["video_id"]
