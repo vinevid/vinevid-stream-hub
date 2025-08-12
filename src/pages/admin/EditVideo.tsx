@@ -60,7 +60,13 @@ const EditVideo = () => {
         .select("id,label,url,sort_order")
         .eq("video_id", id)
         .order("sort_order", { ascending: true });
-      setDownloads((dls ?? []).map((d) => ({ ...d })));
+      setDownloads((dls ?? []).map((d) => ({ 
+        id: d.id,
+        label: d.label,
+        url: d.url,
+        subtitle_url: "",
+        sort_order: d.sort_order
+      })));
     };
     init();
   }, [id]);

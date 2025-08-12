@@ -8,8 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("hephzibaholaolu3@gmail.com");
-  const [password, setPassword] = useState("vinevid#2025");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(true);
   const navigate = useNavigate();
@@ -85,7 +85,7 @@ const AdminLogin = () => {
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)} 
                   required 
-                  placeholder="hephzibaholaolu3@gmail.com"
+                  placeholder="Enter admin email"
                 />
               </div>
               <div>

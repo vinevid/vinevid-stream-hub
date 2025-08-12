@@ -95,7 +95,7 @@ const VideoDetails = () => {
                   <Button 
                     key={download.id} 
                     variant="default" 
-                    className="h-auto p-4 flex flex-col items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white"
+                    className="h-auto p-4 flex flex-col items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
                     onClick={() => onDownload(download.url)}
                   >
                     <span className="font-medium">{download.label}</span>

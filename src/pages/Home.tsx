@@ -68,9 +68,14 @@ const Home = () => {
       <Header />
       <main className="container py-8 space-y-10">
         <section aria-labelledby="latest" className="space-y-4">
-          <h1 id="latest" className="text-2xl font-bold tracking-tight">Latest Updates</h1>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filtered.map((v) => {
+          <div className="flex items-center justify-between">
+            <h1 id="latest" className="text-2xl font-bold tracking-tight">Latest Updates</h1>
+            {filtered.length > 8 && (
+              <Link to="/latest" className="text-sm text-primary hover:underline">See more</Link>
+            )}
+          </div>
+          <div className="grid gap-6 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filtered.slice(0, 8).map((v) => {
               const latestEpisode = getLatestEpisode(v);
               return (
                 <Link key={v.id} to={`/video/${v.id}`} className="group">
@@ -109,7 +114,7 @@ const Home = () => {
                 <Link to="/trending" className="text-sm text-primary hover:underline">See more</Link>
               )}
             </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-6 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {trending.map((v) => {
                 const latestEpisode = getLatestEpisode(v);
                 return (
@@ -147,7 +152,7 @@ const Home = () => {
                 <Link to="/top-cdrama" className="text-sm text-primary hover:underline">See more</Link>
               )}
             </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-6 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {topCdrama.map((v) => {
                 const latestEpisode = getLatestEpisode(v);
                 return (
@@ -188,7 +193,7 @@ const Home = () => {
                 <Link to="/top-kdrama" className="text-sm text-primary hover:underline">See more</Link>
               )}
             </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-6 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {topKdrama.map((v) => {
                 const latestEpisode = getLatestEpisode(v);
                 return (
@@ -236,8 +241,8 @@ const Home = () => {
                   <Link to={`/category/${category.name.toLowerCase()}`} className="text-sm text-primary hover:underline">See more</Link>
                 )}
               </div>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {categoryVideos.map((v) => {
+               <div className="grid gap-6 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                 {categoryVideos.map((v) => {
                   const latestEpisode = getLatestEpisode(v);
                   return (
                     <Link key={v.id} to={`/video/${v.id}`} className="group">

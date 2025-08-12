@@ -18,7 +18,7 @@ const Splash = () => {
       </Helmet>
       <div className="min-h-screen grid place-items-center bg-[radial-gradient(1200px_circle_at_50%_-20%,hsl(var(--brand-surface-glow))_0%,transparent_60%)]">
         <div className="text-center animate-fade-in">
-          <h1 className="text-4xl md:text-6xl font-bold text-yellow-400 mb-4">VineVid</h1>
+          <h1 className="text-4xl md:text-6xl font-bold text-primary mb-4">VineVid</h1>
           <p className="mt-4 text-lg md:text-xl text-muted-foreground">Fast. Free. Forever. VineVid.</p>
         </div>
       </div>
