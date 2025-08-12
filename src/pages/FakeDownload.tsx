@@ -37,14 +37,16 @@ const FakeDownload = () => {
         <link rel="canonical" href={`${location.origin}/download/${id}`} />
       </Helmet>
       <Header />
-      <main className="container py-16 text-center">
-        <h1 className="text-2xl font-bold">Generating secure link...</h1>
-        <p className="text-muted-foreground mt-2">Please wait a few seconds</p>
-        <div className="max-w-md mx-auto mt-8">
-          <Progress value={progress} />
-          <p className="mt-2 text-sm text-muted-foreground">Redirecting when complete</p>
+      <main className="container py-16 text-center min-h-screen flex flex-col justify-center">
+        <div>
+          <h1 className="text-2xl font-bold">Generating secure link...</h1>
+          <p className="text-muted-foreground mt-2">Please wait a few seconds</p>
+          <div className="max-w-md mx-auto mt-8">
+            <Progress value={progress} />
+            <p className="mt-2 text-sm text-muted-foreground">Redirecting when complete</p>
+          </div>
+          <a href={target} className="inline-block mt-6 underline text-primary">Having trouble? Open mirror link</a>
         </div>
-        <a href={target} className="inline-block mt-6 underline text-primary">Having trouble? Open mirror link</a>
       </main>
       <Footer />
     </>

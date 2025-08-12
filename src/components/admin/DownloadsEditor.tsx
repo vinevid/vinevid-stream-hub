@@ -5,6 +5,7 @@ export type EpisodeItem = {
   id?: string;
   label: string;
   url: string;
+  subtitle_url?: string;
   sort_order: number;
 };
 
@@ -44,9 +45,10 @@ export const DownloadsEditor = ({
       </div>
       <div className="space-y-3">
         {items.map((ep, idx) => (
-          <div key={idx} className="grid gap-2 md:grid-cols-[140px_1fr_auto] items-center border rounded-md p-3">
+          <div key={idx} className="grid gap-2 md:grid-cols-[140px_1fr_1fr_auto] items-center border rounded-md p-3">
             <Input value={ep.label} onChange={(e) => update(idx, { label: e.target.value })} placeholder="Label (e.g. Ep 1)" />
-            <Input value={ep.url} onChange={(e) => update(idx, { url: e.target.value })} placeholder="Shortened URL" />
+            <Input value={ep.url} onChange={(e) => update(idx, { url: e.target.value })} placeholder="Download URL" />
+            <Input value={ep.subtitle_url || ""} onChange={(e) => update(idx, { subtitle_url: e.target.value })} placeholder="Subtitle URL (optional)" />
             <div className="flex gap-2 justify-end">
               <Button type="button" size="icon" variant="outline" onClick={() => move(idx, -1)} aria-label="Move up">↑</Button>
               <Button type="button" size="icon" variant="outline" onClick={() => move(idx, 1)} aria-label="Move down">↓</Button>
