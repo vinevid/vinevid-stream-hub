@@ -13,7 +13,7 @@ const fetchVideo = async (id: string) => {
     .select(`
       *,
       categories(name),
-      video_downloads(id, label, url, subtitle_url, sort_order)
+      video_downloads(*)
     `)
     .eq("id", id)
     .single();
@@ -111,12 +111,12 @@ const VideoDetails = () => {
                       <span className="font-medium">{download.label}</span>
                       <span className="text-xs opacity-90">Click to Download</span>
                     </Button>
-                    {download.subtitle_url && (
+                    {(download as any).subtitle_url && (
                       <Button 
                         variant="outline" 
                         size="sm"
                         className="w-full"
-                        onClick={() => onSubtitleDownload(download.subtitle_url)}
+                        onClick={() => onSubtitleDownload((download as any).subtitle_url)}
                       >
                         <span className="text-xs">Download Subtitles</span>
                       </Button>
