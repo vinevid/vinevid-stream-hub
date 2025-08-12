@@ -13,7 +13,7 @@ const fetchVideo = async (id: string) => {
     .select(`
       *,
       categories(name),
-      video_downloads(*)
+      video_downloads(id, label, url, subtitle_url, sort_order)
     `)
     .eq("id", id)
     .single();
@@ -57,6 +57,16 @@ const VideoDetails = () => {
     window.open(fakeDownloadUrl, '_blank');
   };
 
+  const onSubtitleDownload = (subtitleUrl: string) => {
+    // Direct download for subtitle files
+    const link = document.createElement('a');
+    link.href = subtitleUrl;
+    link.download = '';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (isLoading) return <div>Loading...</div>;
   if (!video) return <div>Video not found</div>;
 
@@ -92,15 +102,26 @@ const VideoDetails = () => {
               {video.video_downloads
                 .sort((a, b) => a.sort_order - b.sort_order)
                 .map((download) => (
-                  <Button 
-                    key={download.id} 
-                    variant="default" 
-                    className="h-auto p-4 flex flex-col items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
-                    onClick={() => onDownload(download.url)}
-                  >
-                    <span className="font-medium">{download.label}</span>
-                    <span className="text-xs opacity-90">Click to Download</span>
-                  </Button>
+                  <div key={download.id} className="space-y-2">
+                    <Button 
+                      variant="default" 
+                      className="w-full h-auto p-4 flex flex-col items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+                      onClick={() => onDownload(download.url)}
+                    >
+                      <span className="font-medium">{download.label}</span>
+                      <span className="text-xs opacity-90">Click to Download</span>
+                    </Button>
+                    {download.subtitle_url && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="w-full"
+                        onClick={() => onSubtitleDownload(download.subtitle_url)}
+                      >
+                        <span className="text-xs">Download Subtitles</span>
+                      </Button>
+                    )}
+                  </div>
                 ))}
             </div>
           </section>
