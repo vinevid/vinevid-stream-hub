@@ -12,7 +12,10 @@ import { Textarea } from "@/components/ui/textarea";
 const fetchComments = async () => {
   const { data, error } = await supabase
     .from("comments")
-    .select("id,name,content,status,video_id,parent_id,is_admin_reply,created_at")
+    .select(`
+      id,name,content,status,video_id,parent_id,is_admin_reply,created_at,
+      videos(title)
+    `)
     .is("parent_id", null) // Only top-level comments
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -168,6 +171,9 @@ const CommentCard = ({
         <CardTitle className="text-base">
           {comment.name} — <span className="text-muted-foreground text-sm">{new Date(comment.created_at).toLocaleString()}</span>
         </CardTitle>
+        <div className="text-sm text-primary font-medium">
+          Video: {comment.videos?.title || 'Unknown Video'}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {editingComment === comment.id ? (

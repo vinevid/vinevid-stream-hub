@@ -5,14 +5,24 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Logo } from "@/components/Logo";
 import { Search } from "lucide-react";
 import { useState } from "react";
+import { SearchSuggestions } from "@/components/SearchSuggestions";
 
 export const Header = () => {
   const [query, setQuery] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
 
   const onSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate(`/home?q=${encodeURIComponent(query)}`);
+    if (query.trim()) {
+      navigate(`/home?q=${encodeURIComponent(query)}`);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSuggestionSelect = () => {
+    setShowSuggestions(false);
+    setQuery("");
   };
 
   return (
@@ -26,12 +36,20 @@ export const Header = () => {
           <div className="relative w-full">
             <Input
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               placeholder="Search movies, dramas..."
               aria-label="Search"
               className="pr-10"
             />
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            {showSuggestions && (
+              <SearchSuggestions query={query} onSelect={handleSuggestionSelect} />
+            )}
           </div>
           <Button type="submit" variant="default">Search</Button>
         </form>
@@ -45,12 +63,20 @@ export const Header = () => {
         <div className="relative">
           <Input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             placeholder="Search movies, dramas..."
             aria-label="Search"
             className="pr-10"
           />
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          {showSuggestions && (
+            <SearchSuggestions query={query} onSelect={handleSuggestionSelect} />
+          )}
         </div>
       </form>
     </header>
