@@ -5,6 +5,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { WelcomeDialog } from "@/components/WelcomeDialog";
 
 function useQueryParams() {
   const { search } = useLocation();

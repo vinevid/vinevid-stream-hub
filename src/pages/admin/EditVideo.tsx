@@ -73,6 +73,7 @@ const EditVideo = () => {
 
   const save = useMutation({
     mutationFn: async () => {
+      // Update video with new timestamp to show in latest updates
       const { error } = await supabase.from("videos").update({
         title,
         poster_url: poster,
@@ -85,6 +86,7 @@ const EditVideo = () => {
         comments_enabled: commentsEnabled,
         top_cdrama: topCdrama,
         top_kdrama: topKdrama,
+        updated_at: new Date().toISOString(), // Update timestamp for latest updates
       }).eq("id", id);
       if (error) throw error;
       // Upsert downloads: simplest approach - delete then insert current list
@@ -95,6 +97,7 @@ const EditVideo = () => {
           video_id: id as string,
           label: d.label,
           url: d.url,
+          subtitle_url: d.subtitle_url || null,
           sort_order: i,
         }));
         const { error: ins } = await supabase.from("video_downloads").insert(payload);

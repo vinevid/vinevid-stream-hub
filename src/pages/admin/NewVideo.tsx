@@ -60,6 +60,7 @@ const NewVideo = () => {
           video_id: vid,
           label: d.label,
           url: d.url,
+          subtitle_url: d.subtitle_url || null,
           sort_order: i,
         }));
         const { error: e2 } = await supabase.from("video_downloads").insert(payload);

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
+import { Textarea } from "@/components/ui/textarea";
 
 const fetchComments = async () => {
   const { data, error } = await supabase
@@ -33,6 +34,8 @@ const AdminComments = () => {
   const { data: items } = useQuery({ queryKey: ["admin-comments"], queryFn: fetchComments });
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [editingComment, setEditingComment] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
 
   const doUpdate = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: "approved" | "pending" | "spam" }) => {
@@ -70,6 +73,19 @@ const AdminComments = () => {
     },
   });
 
+  const doEdit = useMutation({
+    mutationFn: async ({ id, content }: { id: string; content: string }) => {
+      const { error } = await supabase.from("comments").update({ content: content.trim() }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-comments"] });
+      qc.invalidateQueries({ queryKey: ["replies"] });
+      setEditingComment(null);
+      setEditText("");
+    },
+  });
+
   return (
     <>
       <Helmet>
@@ -89,10 +105,19 @@ const AdminComments = () => {
               onDelete={doDelete.mutate}
               onReply={(id) => setReplyingTo(id)}
               onSubmitReply={(parentId, content) => doReply.mutate({ parentId, content, videoId: c.video_id })}
+              onEdit={(id, content) => {
+                setEditingComment(id);
+                setEditText(content);
+              }}
+              onSubmitEdit={(id, content) => doEdit.mutate({ id, content })}
               replyingTo={replyingTo}
               replyText={replyText}
               setReplyText={setReplyText}
               isReplying={doReply.isPending}
+              editingComment={editingComment}
+              editText={editText}
+              setEditText={setEditText}
+              isEditing={doEdit.isPending}
             />
           ))}
           {(items ?? []).length === 0 && <p className="text-sm text-muted-foreground">No comments yet.</p>}
@@ -109,10 +134,16 @@ const CommentCard = ({
   onDelete, 
   onReply, 
   onSubmitReply, 
+  onEdit,
+  onSubmitEdit,
   replyingTo, 
   replyText, 
   setReplyText, 
-  isReplying 
+  isReplying,
+  editingComment,
+  editText,
+  setEditText,
+  isEditing
 }: any) => {
   const { data: replies = [] } = useQuery({
     queryKey: ["replies", comment.id],
@@ -125,6 +156,12 @@ const CommentCard = ({
     onSubmitReply(comment.id, replyText);
   };
 
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editText.trim()) return;
+    onSubmitEdit(comment.id, editText);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -133,7 +170,31 @@ const CommentCard = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm max-w-3xl">{comment.content}</p>
+        {editingComment === comment.id ? (
+          <form onSubmit={handleEditSubmit} className="space-y-3">
+            <Textarea
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              disabled={isEditing}
+              className="min-h-[100px]"
+            />
+            <div className="flex gap-2">
+              <Button type="submit" size="sm" disabled={isEditing || !editText.trim()}>
+                {isEditing ? "Saving..." : "Save"}
+              </Button>
+              <Button 
+                type="button" 
+                size="sm" 
+                variant="outline" 
+                onClick={() => onEdit(null, "")}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <p className="text-sm max-w-3xl">{comment.content}</p>
+        )}
         
         {replies.length > 0 && (
           <div className="space-y-2 border-l-2 border-muted pl-4">
@@ -182,11 +243,22 @@ const CommentCard = ({
             <Button size="sm" variant="destructive" onClick={() => onUpdate({ id: comment.id, status: "spam" })}>Spam</Button>
             <Button size="sm" variant="destructive" onClick={() => onDelete(comment.id)}>Delete</Button>
           </div>
-          {replyingTo !== comment.id && (
-            <Button size="sm" variant="default" onClick={() => onReply(comment.id)}>
-              Reply
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {editingComment !== comment.id && (
+              <Button 
+                size="sm" 
+                variant="secondary" 
+                onClick={() => onEdit(comment.id, comment.content)}
+              >
+                Edit
+              </Button>
+            )}
+            {replyingTo !== comment.id && editingComment !== comment.id && (
+              <Button size="sm" variant="default" onClick={() => onReply(comment.id)}>
+                Reply
+              </Button>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
