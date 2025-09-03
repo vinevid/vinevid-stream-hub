@@ -6,6 +6,7 @@ import { Logo } from "@/components/Logo";
 import { Search } from "lucide-react";
 import { useState } from "react";
 import { SearchSuggestions } from "@/components/SearchSuggestions";
+import { ScrollingBanner } from "@/components/ScrollingBanner";
 
 export const Header = () => {
   const [query, setQuery] = useState("");
@@ -26,7 +27,9 @@ export const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <>
+      <ScrollingBanner />
+      <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between gap-4">
         <Link to="/home" className="flex items-center gap-3" aria-label="VineVid Home">
           <div className="h-8 w-8"><Logo /></div>
@@ -80,5 +83,6 @@ export const Header = () => {
         </div>
       </form>
     </header>
+    </>
   );
 };

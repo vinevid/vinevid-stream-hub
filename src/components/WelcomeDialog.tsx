@@ -7,18 +7,14 @@ export const WelcomeDialog = () => {
 
   useEffect(() => {
     // Show welcome dialog after a short delay when component mounts
-    const hasSeenWelcome = localStorage.getItem('vinevid-welcome-shown');
-    if (!hasSeenWelcome) {
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-      }, 2000); // Show after 2 seconds to allow splash screen to finish
-      return () => clearTimeout(timer);
-    }
+    const timer = setTimeout(() => {
+      setIsOpen(true);
+    }, 2000); // Show after 2 seconds to allow splash screen to finish
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {
     setIsOpen(false);
-    localStorage.setItem('vinevid-welcome-shown', 'true');
   };
 
   return (
