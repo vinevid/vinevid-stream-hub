@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { sanitizeText, sanitizeHtml, validateName } from "@/utils/sanitizer";
 
 const fetchComments = async (videoId: string) => {
   const { data, error } = await supabase
@@ -40,13 +41,24 @@ export const Comments = ({ videoId }: { videoId: string }) => {
 
   const addComment = useMutation({
     mutationFn: async ({ name, content }: { name: string; content: string }) => {
+      const sanitizedName = sanitizeText(name);
+      const sanitizedContent = sanitizeText(content);
+      
+      if (!validateName(sanitizedName)) {
+        throw new Error("Name must be between 2 and 50 characters");
+      }
+      
+      if (sanitizedContent.length < 5) {
+        throw new Error("Comment must be at least 5 characters long");
+      }
+      
       const { error } = await supabase
         .from("comments")
         .insert({
           video_id: videoId,
-          name: name.trim(),
-          content: content.trim(),
-          status: "approved", // Auto-approve all comments
+          name: sanitizedName,
+          content: sanitizedContent,
+          status: "pending", // Changed from auto-approve for security
         });
       
       if (error) throw error;
@@ -54,7 +66,7 @@ export const Comments = ({ videoId }: { videoId: string }) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", videoId] });
       setText("");
-      setError("Comment posted successfully!");
+      setError("Comment submitted and is pending approval!");
     },
     onError: (error) => {
       setError("Failed to submit comment. Please try again.");
@@ -66,8 +78,16 @@ export const Comments = ({ videoId }: { videoId: string }) => {
     e.preventDefault();
     setError(null);
     
-    if (!name.trim() || !text.trim()) {
-      setError("Name and comment are required.");
+    const sanitizedName = sanitizeText(name);
+    const sanitizedText = sanitizeText(text);
+    
+    if (!validateName(sanitizedName)) {
+      setError("Name must be between 2 and 50 characters");
+      return;
+    }
+    
+    if (sanitizedText.length < 5) {
+      setError("Comment must be at least 5 characters long");
       return;
     }
     
@@ -76,7 +96,7 @@ export const Comments = ({ videoId }: { videoId: string }) => {
       return;
     }
     
-    addComment.mutate({ name, content: text });
+    addComment.mutate({ name: sanitizedName, content: sanitizedText });
   };
 
   return (
@@ -132,7 +152,10 @@ const CommentItem = ({ comment }: { comment: any }) => {
             · {new Date(comment.created_at).toLocaleString()}
           </span>
         </div>
-        <p className="text-sm mt-1">{comment.content}</p>
+        <p 
+          className="text-sm mt-1"
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(comment.content) }}
+        />
       </div>
       
       {replies.length > 0 && (
@@ -149,7 +172,10 @@ const CommentItem = ({ comment }: { comment: any }) => {
                   · {new Date(reply.created_at).toLocaleString()}
                 </span>
               </div>
-              <p className="text-sm mt-1">{reply.content}</p>
+              <p 
+                className="text-sm mt-1"
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(reply.content) }}
+              />
             </div>
           ))}
         </div>

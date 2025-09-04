@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { sanitizeText, sanitizeHtml, validateName } from "@/utils/sanitizer";
 
 const fetchComments = async () => {
   const { data, error } = await supabase
@@ -25,7 +26,14 @@ const fetchComments = async () => {
 const fetchReplies = async (parentId: string) => {
   const { data, error } = await supabase
     .from("comments")
-    .select("*")
+    .select(`
+      id,
+      name,
+      content,
+      status,
+      created_at,
+      is_admin_reply
+    `)
     .eq("parent_id", parentId)
     .order("created_at", { ascending: true });
   if (error) throw error;
@@ -58,11 +66,16 @@ const AdminComments = () => {
 
   const doReply = useMutation({
     mutationFn: async ({ parentId, content, videoId }: { parentId: string; content: string; videoId: string }) => {
+      const sanitizedContent = sanitizeText(content);
+      if (sanitizedContent.length < 5) {
+        throw new Error("Reply must be at least 5 characters long");
+      }
+      
       const { error } = await supabase.from("comments").insert({
         parent_id: parentId,
         video_id: videoId,
         name: "VineVid",
-        content: content.trim(),
+        content: sanitizedContent,
         status: "approved",
         is_admin_reply: true,
       });
@@ -78,7 +91,12 @@ const AdminComments = () => {
 
   const doEdit = useMutation({
     mutationFn: async ({ id, content }: { id: string; content: string }) => {
-      const { error } = await supabase.from("comments").update({ content: content.trim() }).eq("id", id);
+      const sanitizedContent = sanitizeText(content);
+      if (sanitizedContent.length < 5) {
+        throw new Error("Comment must be at least 5 characters long");
+      }
+      
+      const { error } = await supabase.from("comments").update({ content: sanitizedContent }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -199,7 +217,10 @@ const CommentCard = ({
             </div>
           </form>
         ) : (
-          <p className="text-sm max-w-3xl">{comment.content}</p>
+          <p 
+            className="text-sm max-w-3xl"
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(comment.content) }}
+          />
         )}
         
         {replies.length > 0 && (
@@ -217,7 +238,10 @@ const CommentCard = ({
                     {new Date(reply.created_at).toLocaleString()}
                   </span>
                 </div>
-                <p className="text-sm mt-1">{reply.content}</p>
+                <p 
+                  className="text-sm mt-1"
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(reply.content) }}
+                />
               </div>
             ))}
           </div>

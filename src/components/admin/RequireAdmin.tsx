@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const RequireAdmin = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -17,7 +17,19 @@ export const RequireAdmin = ({ children }: { children: React.ReactNode }) => {
           return;
         }
 
-        setIsAuthenticated(true);
+        // Check if user has admin role
+        const { data: hasAdminRole, error } = await supabase.rpc('has_role', {
+          _user_id: session.user.id,
+          _role: 'admin'
+        });
+
+        if (error || !hasAdminRole) {
+          console.error("Admin role check failed:", error);
+          navigate("/admin/login", { replace: true });
+          return;
+        }
+
+        setIsAdmin(true);
       } catch (error) {
         console.error("Auth check failed:", error);
         navigate("/admin/login", { replace: true });
@@ -37,7 +49,7 @@ export const RequireAdmin = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAdmin) {
     return null;
   }
 

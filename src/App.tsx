@@ -25,6 +25,7 @@ const LazyAdminComments = lazy(() => import("./pages/admin/Comments"));
 const LazyAdminSettings = lazy(() => import("./pages/admin/Settings"));
 const LazyAdminCategories = lazy(() => import("./pages/admin/Categories"));
 const LazyAdminHowTo = lazy(() => import("./pages/admin/HowToEditor"));
+const LazyAdminConfig = lazy(() => import("./pages/admin/AdminConfig"));
 const CategoryListing = lazy(() => import("./pages/CategoryListing"));
 const Latest = lazy(() => import("./pages/Latest"));
 const Trending = lazy(() => import("./pages/Trending"));
@@ -64,6 +65,7 @@ const App = () => (
                   <Route path="videos/:id/edit" element={<LazyAdminEditVideo />} />
                   <Route path="comments" element={<LazyAdminComments />} />
                   <Route path="settings" element={<LazyAdminSettings />} />
+                  <Route path="config" element={<LazyAdminConfig />} />
                   <Route path="categories" element={<LazyAdminCategories />} />
                   <Route path="how-to" element={<LazyAdminHowTo />} />
                 </Route>

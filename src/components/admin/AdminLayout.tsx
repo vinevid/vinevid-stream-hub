@@ -35,6 +35,7 @@ const AdminLayout = () => {
     { path: "/admin/categories", label: "Categories", icon: List },
     { path: "/admin/how-to", label: "How To", icon: HelpCircle },
     { path: "/admin/settings", label: "Settings", icon: Settings },
+    { path: "/admin/config", label: "Admin Config", icon: Settings },
   ];
 
   return (
