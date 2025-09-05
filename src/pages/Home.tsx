@@ -20,7 +20,7 @@ const fetchVideos = async () => {
       categories(name),
       video_downloads(label, sort_order)
     `)
-    .order("created_at", { ascending: false });
+    .order("updated_at", { ascending: false });
   if (error) throw error;
   return data;
 };
