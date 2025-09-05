@@ -8,7 +8,7 @@ import { useState } from "react";
 import { SearchSuggestions } from "@/components/SearchSuggestions";
 import { ScrollingBanner } from "@/components/ScrollingBanner";
 
-export const Header = () => {
+import { Header } from '@/components/layout/Header';
   const [query, setQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
@@ -58,7 +58,12 @@ export const Header = () => {
         </form>
         <nav className="flex items-center gap-2">
           <Link to="/how-to-download" className="hidden sm:block text-sm text-muted-foreground hover:text-foreground">How to Download</Link>
-          <ThemeToggle />
+            <Button asChild variant="ghost">
+              <Link to="/profile">Profile</Link>
+            </Button>
+            <Button asChild variant="ghost">
+              <Link to="/watchlist">Watchlist</Link>
+            </Button>
         </nav>
       </div>
       {/* Mobile search */}

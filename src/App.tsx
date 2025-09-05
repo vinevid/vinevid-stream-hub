@@ -14,6 +14,12 @@ import { About, DMCA, Contact } from "./pages/StaticPages";
 import NotFound from "./pages/NotFound";
 import { ThemeProvider } from "./components/theme/ThemeProvider";
 import { RequireAdmin } from "./components/admin/RequireAdmin";
+import { AuthProvider } from "./contexts/AuthContext";
+
+const Auth = lazy(() => import("./pages/Auth"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Watchlist = lazy(() => import("./pages/Watchlist"));
+const SearchResults = lazy(() => import("./pages/SearchResults"));
 
 const AdminLogin = lazy(() => import("./pages/admin/Login"));
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
@@ -38,43 +44,49 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <HelmetProvider>
       <ThemeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Suspense fallback={null}>
-              <Routes>
-                <Route path="/" element={<Splash />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/how-to-download" element={<HowToDownload />} />
-                <Route path="/video/:id" element={<VideoDetails />} />
-                <Route path="/download/:id" element={<FakeDownload />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/dmca" element={<DMCA />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/category/:category" element={<CategoryListing />} />
-                <Route path="/latest" element={<Latest />} />
-                <Route path="/trending" element={<Trending />} />
-                <Route path="/top-cdrama" element={<TopCdrama />} />
-                <Route path="/top-kdrama" element={<TopKdrama />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
-                  <Route index element={<AdminDashboard />} />
-                  <Route path="videos" element={<LazyAdminVideosList />} />
-                  <Route path="videos/new" element={<LazyAdminNewVideo />} />
-                  <Route path="videos/:id/edit" element={<LazyAdminEditVideo />} />
-                  <Route path="comments" element={<LazyAdminComments />} />
-                  <Route path="settings" element={<LazyAdminSettings />} />
-                  <Route path="config" element={<LazyAdminConfig />} />
-                  <Route path="categories" element={<LazyAdminCategories />} />
-                  <Route path="how-to" element={<LazyAdminHowTo />} />
-                </Route>
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
-        </TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Suspense fallback={null}>
+                <Routes>
+                  <Route path="/" element={<Splash />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/watchlist" element={<Watchlist />} />
+                  <Route path="/search" element={<SearchResults />} />
+                  <Route path="/how-to-download" element={<HowToDownload />} />
+                  <Route path="/video/:id" element={<VideoDetails />} />
+                  <Route path="/download/:id" element={<FakeDownload />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/dmca" element={<DMCA />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/category/:category" element={<CategoryListing />} />
+                  <Route path="/latest" element={<Latest />} />
+                  <Route path="/trending" element={<Trending />} />
+                  <Route path="/top-cdrama" element={<TopCdrama />} />
+                  <Route path="/top-kdrama" element={<TopKdrama />} />
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
+                    <Route index element={<AdminDashboard />} />
+                    <Route path="videos" element={<LazyAdminVideosList />} />
+                    <Route path="videos/new" element={<LazyAdminNewVideo />} />
+                    <Route path="videos/:id/edit" element={<LazyAdminEditVideo />} />
+                    <Route path="comments" element={<LazyAdminComments />} />
+                    <Route path="settings" element={<LazyAdminSettings />} />
+                    <Route path="config" element={<LazyAdminConfig />} />
+                    <Route path="categories" element={<LazyAdminCategories />} />
+                    <Route path="how-to" element={<LazyAdminHowTo />} />
+                  </Route>
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
       </ThemeProvider>
     </HelmetProvider>
   </QueryClientProvider>
