@@ -8,7 +8,7 @@ import { useState } from "react";
 import { SearchSuggestions } from "@/components/SearchSuggestions";
 import { ScrollingBanner } from "@/components/ScrollingBanner";
 
-import { Header } from '@/components/layout/Header';
+export const Header = () => {
   const [query, setQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
