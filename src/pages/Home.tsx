@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { HeroCarousel } from "@/components/HeroCarousel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -67,6 +68,7 @@ const Home = () => {
         <link rel="canonical" href={`${location.origin}/home`} />
       </Helmet>
       <Header />
+      <HeroCarousel />
       <main className="container py-8 space-y-10">
         <section aria-labelledby="latest" className="space-y-4">
           <div className="flex items-center justify-between">

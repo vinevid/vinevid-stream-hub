@@ -76,7 +76,7 @@ const fetchWatchlist = async (userId: string): Promise<WatchlistVideo[]> => {
   })) || [];
 };
 
-const Watchlist = () => {
+const Downloads = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { user } = useAuth();
 
@@ -90,8 +90,8 @@ const Watchlist = () => {
     return (
       <>
         <Helmet>
-          <title>Watchlist | VineVid</title>
-          <meta name="description" content="Sign in to view your watchlist on VineVid" />
+          <title>My Downloads | VineVid</title>
+          <meta name="description" content="Sign in to view your download list on VineVid" />
         </Helmet>
         
         <div className="min-h-screen flex flex-col">
@@ -103,7 +103,7 @@ const Watchlist = () => {
                 <Heart className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
                 <h2 className="text-2xl font-bold mb-2">Sign In Required</h2>
                 <p className="text-muted-foreground mb-6">
-                  Please sign in to view your watchlist and save your favorite videos.
+                  Please sign in to view your download list and save your favorite content.
                 </p>
                 <Button asChild>
                   <Link to="/auth">Sign In</Link>
@@ -121,8 +121,8 @@ const Watchlist = () => {
   return (
     <>
       <Helmet>
-        <title>My Watchlist | VineVid</title>
-        <meta name="description" content="Your saved videos and favorites on VineVid" />
+        <title>My Downloads | VineVid</title>
+        <meta name="description" content="Your saved videos and favorite content on VineVid" />
         <link rel="canonical" href={`${window.location.origin}/watchlist`} />
       </Helmet>
       
@@ -132,7 +132,7 @@ const Watchlist = () => {
         <main className="flex-1 container mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold mb-2">My Watchlist</h1>
+              <h1 className="text-3xl font-bold mb-2">My Downloads</h1>
               <p className="text-muted-foreground">
                 {watchlist.length} video{watchlist.length !== 1 ? 's' : ''} saved
               </p>
@@ -166,9 +166,9 @@ const Watchlist = () => {
             <Card className="text-center py-12">
               <CardContent>
                 <Heart className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                <h2 className="text-xl font-semibold mb-2">Your watchlist is empty</h2>
+                <h2 className="text-xl font-semibold mb-2">Your download list is empty</h2>
                 <p className="text-muted-foreground mb-6">
-                  Start adding videos to your watchlist by clicking the heart icon on any video.
+                  Start adding content to your list by clicking the heart icon on any video.
                 </p>
                 <Button asChild>
                   <Link to="/">Browse Videos</Link>
@@ -207,4 +207,4 @@ const Watchlist = () => {
   );
 };
 
-export default Watchlist;
+export default Downloads;

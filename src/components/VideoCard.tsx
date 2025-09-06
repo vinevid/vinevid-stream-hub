@@ -49,7 +49,7 @@ export const VideoCard = ({
     e.preventDefault();
     
     if (!user) {
-      toast.error('Please sign in to add to watchlist');
+      toast.error('Please sign in to add to downloads list');
       return;
     }
 
@@ -64,7 +64,7 @@ export const VideoCard = ({
           .eq('video_id', video.id);
 
         if (error) throw error;
-        toast.success('Removed from watchlist');
+        toast.success('Removed from downloads list');
       } else {
         const { error } = await supabase
           .from('user_watchlist')
@@ -74,7 +74,7 @@ export const VideoCard = ({
           });
 
         if (error) throw error;
-        toast.success('Added to watchlist');
+        toast.success('Added to downloads list');
       }
 
       onWatchlistChange?.();

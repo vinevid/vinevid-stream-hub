@@ -62,7 +62,7 @@ export const Header = () => {
               <Link to="/profile">Profile</Link>
             </Button>
             <Button asChild variant="ghost">
-              <Link to="/watchlist">Watchlist</Link>
+              <Link to="/watchlist">My Downloads</Link>
             </Button>
         </nav>
       </div>

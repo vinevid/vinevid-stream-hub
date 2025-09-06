@@ -18,7 +18,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 
 const Auth = lazy(() => import("./pages/Auth"));
 const Profile = lazy(() => import("./pages/Profile"));
-const Watchlist = lazy(() => import("./pages/Watchlist"));
+const Downloads = lazy(() => import("./pages/Downloads"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
 
 const AdminLogin = lazy(() => import("./pages/admin/Login"));
@@ -55,7 +55,7 @@ const App = () => (
                   <Route path="/home" element={<Home />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/profile" element={<Profile />} />
-                  <Route path="/watchlist" element={<Watchlist />} />
+                  <Route path="/watchlist" element={<Downloads />} />
                   <Route path="/search" element={<SearchResults />} />
                   <Route path="/how-to-download" element={<HowToDownload />} />
                   <Route path="/video/:id" element={<VideoDetails />} />
