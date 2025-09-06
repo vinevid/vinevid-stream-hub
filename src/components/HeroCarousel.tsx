@@ -13,6 +13,7 @@ import { Download, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import Autoplay from "embla-carousel-autoplay";
+import { HeroSkeleton } from "@/components/ui/video-skeleton";
 
 interface FeaturedVideo {
   id: string;
@@ -58,12 +59,12 @@ export const HeroCarousel = () => {
     queryFn: fetchFeaturedContent,
   });
 
-  if (isLoading || !featuredContent.length) {
-    return (
-      <section className="relative h-[70vh] bg-gradient-to-r from-primary/20 to-primary/10 animate-pulse">
-        <div className="absolute inset-0 bg-black/20" />
-      </section>
-    );
+  if (isLoading) {
+    return <HeroSkeleton />;
+  }
+
+  if (!featuredContent.length) {
+    return null;
   }
 
   return (

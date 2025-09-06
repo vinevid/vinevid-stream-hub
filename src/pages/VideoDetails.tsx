@@ -6,6 +6,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Comments } from "@/sections/Comments";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const fetchVideo = async (id: string) => {
   const { data, error } = await supabase
@@ -67,7 +68,37 @@ const VideoDetails = () => {
     document.body.removeChild(link);
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 container mx-auto px-4 py-8">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="md:col-span-1">
+              <Skeleton className="aspect-[2/3] w-full rounded-lg" />
+            </div>
+            <div className="md:col-span-2 space-y-6">
+              <div className="space-y-4">
+                <Skeleton className="h-8 w-3/4" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-6 w-20" />
+                  <Skeleton className="h-6 w-16" />
+                </div>
+                <Skeleton className="h-20 w-full" />
+              </div>
+              <div className="space-y-4">
+                <Skeleton className="h-6 w-32" />
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
   if (!video) return <div>Video not found</div>;
 
   return (

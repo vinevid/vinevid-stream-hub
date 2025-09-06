@@ -32,6 +32,7 @@ const LazyAdminSettings = lazy(() => import("./pages/admin/Settings"));
 const LazyAdminCategories = lazy(() => import("./pages/admin/Categories"));
 const LazyAdminHowTo = lazy(() => import("./pages/admin/HowToEditor"));
 const LazyAdminConfig = lazy(() => import("./pages/admin/AdminConfig"));
+const LazyAdminFeaturedContent = lazy(() => import("./pages/admin/FeaturedContent"));
 const CategoryListing = lazy(() => import("./pages/CategoryListing"));
 const Latest = lazy(() => import("./pages/Latest"));
 const Trending = lazy(() => import("./pages/Trending"));
@@ -74,6 +75,7 @@ const App = () => (
                     <Route path="videos" element={<LazyAdminVideosList />} />
                     <Route path="videos/new" element={<LazyAdminNewVideo />} />
                     <Route path="videos/:id/edit" element={<LazyAdminEditVideo />} />
+                    <Route path="featured" element={<LazyAdminFeaturedContent />} />
                     <Route path="comments" element={<LazyAdminComments />} />
                     <Route path="settings" element={<LazyAdminSettings />} />
                     <Route path="config" element={<LazyAdminConfig />} />

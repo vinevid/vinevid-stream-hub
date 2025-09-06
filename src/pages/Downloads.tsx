@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Heart, Grid, List } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { VideoGridSkeleton } from "@/components/ui/video-skeleton";
 
 interface WatchlistVideo {
   id: string;
@@ -157,11 +158,7 @@ const Downloads = () => {
           </div>
 
           {isLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {Array.from({ length: 12 }).map((_, i) => (
-                <div key={i} className="aspect-[2/3] bg-muted animate-pulse rounded-lg" />
-              ))}
-            </div>
+            <VideoGridSkeleton count={12} />
           ) : watchlist.length === 0 ? (
             <Card className="text-center py-12">
               <CardContent>

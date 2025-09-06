@@ -31,6 +31,7 @@ const AdminLayout = () => {
   const navItems = [
     { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/videos", label: "Videos", icon: Video },
+    { path: "/admin/featured", label: "Featured Content", icon: Video },
     { path: "/admin/comments", label: "Comments", icon: MessageSquare },
     { path: "/admin/categories", label: "Categories", icon: List },
     { path: "/admin/how-to", label: "How To", icon: HelpCircle },
