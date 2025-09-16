@@ -26,18 +26,57 @@ const fetchVideoByTitle = async (title: string) => {
   // Convert URL-friendly title to searchable format
   const searchTitle = title.replace(/-/g, ' ');
   
+  console.log("Searching for title:", searchTitle);
+  
+  // Get all videos and filter locally for better matching
   const { data, error } = await supabase
     .from("videos")
     .select(`
       *,
       categories(name),
       video_downloads(*)
-    `)
-    .ilike("title", `%${searchTitle}%`)
-    .limit(1)
-    .single();
+    `);
+    
   if (error) throw error;
-  return data;
+  if (!data || data.length === 0) {
+    throw new Error("No videos found in database");
+  }
+  
+  // Try to find the best match
+  // First try exact match (case insensitive)
+  const exactMatch = data.find(v => 
+    v.title.toLowerCase() === searchTitle.toLowerCase()
+  );
+  
+  if (exactMatch) return exactMatch;
+  
+  // Then try to find by contains
+  const partialMatches = data.filter(v => 
+    v.title.toLowerCase().includes(searchTitle.toLowerCase())
+  );
+  
+  if (partialMatches.length > 0) {
+    // Sort by closest length match
+    partialMatches.sort((a, b) => 
+      Math.abs(a.title.length - searchTitle.length) - 
+      Math.abs(b.title.length - searchTitle.length)
+    );
+    return partialMatches[0];
+  }
+  
+  // If still no match, try more flexible matching
+  const words = searchTitle.toLowerCase().split(' ').filter(w => w.length > 3);
+  if (words.length > 0) {
+    for (const video of data) {
+      for (const word of words) {
+        if (video.title.toLowerCase().includes(word)) {
+          return video;
+        }
+      }
+    }
+  }
+  
+  throw new Error("Video not found");
 };
 
 const fetchRelatedVideos = async (categoryId: string, videoId: string) => {
@@ -55,10 +94,14 @@ const fetchRelatedVideos = async (categoryId: string, videoId: string) => {
 };
 
 const VideoDetails = () => {
-  const { id, title } = useParams();
+  const params = useParams();
   const navigate = useNavigate();
   
-  const { data: video, isLoading } = useQuery({
+  // Extract id or title from params
+  const id = params.id;
+  const title = params.title;
+  
+  const { data: video, isLoading, error } = useQuery({
     queryKey: ["video", id, title],
     queryFn: async () => {
       if (id) {
@@ -69,6 +112,8 @@ const VideoDetails = () => {
       throw new Error("No id or title provided");
     },
     enabled: !!(id || title),
+    retry: 1,
+    retryDelay: 1000,
   });
 
   const { data: relatedVideos = [] } = useQuery({
