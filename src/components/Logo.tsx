@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getTransparentLogo } from "@/utils/logoBgRemoval";
 
-const SOURCE_URL = "/lovable-uploads/c3d7b297-0ddf-4334-b83c-098f3d126a15.png";
+const SOURCE_URL = "/logo.png";
 
 export const Logo = ({ className = "", alt = "VineVid logo" }: { className?: string; alt?: string }) => {
   const [src, setSrc] = useState<string | null>(null);

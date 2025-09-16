@@ -81,7 +81,7 @@ const Home = () => {
             {filtered.slice(0, 8).map((v) => {
               const latestEpisode = getLatestEpisode(v);
               return (
-                <Link key={v.id} to={`/video/${v.id}`} className="group">
+                <Link key={v.id} to={`/${v.title.toLowerCase().replace(/\s+/g, '-')}`} className="group">
                   <Card className="h-full overflow-hidden">
                      <div className="aspect-[3/2] overflow-hidden relative">
                        <img

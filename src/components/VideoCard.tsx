@@ -90,7 +90,7 @@ export const VideoCard = ({
       "group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105",
       className
     )}>
-      <Link to={`/video/${video.id}`}>
+      <Link to={`/${video.title.toLowerCase().replace(/\s+/g, '-')}`}>
         <div className="aspect-[2/3] overflow-hidden">
           <img
             src={video.poster_url || '/placeholder.svg'}

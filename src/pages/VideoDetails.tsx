@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Comments } from "@/sections/Comments";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const fetchVideo = async (id: string) => {
+const fetchVideoById = async (id: string) => {
   const { data, error } = await supabase
     .from("videos")
     .select(`
@@ -17,6 +17,24 @@ const fetchVideo = async (id: string) => {
       video_downloads(*)
     `)
     .eq("id", id)
+    .single();
+  if (error) throw error;
+  return data;
+};
+
+const fetchVideoByTitle = async (title: string) => {
+  // Convert URL-friendly title to searchable format
+  const searchTitle = title.replace(/-/g, ' ');
+  
+  const { data, error } = await supabase
+    .from("videos")
+    .select(`
+      *,
+      categories(name),
+      video_downloads(*)
+    `)
+    .ilike("title", `%${searchTitle}%`)
+    .limit(1)
     .single();
   if (error) throw error;
   return data;
@@ -37,24 +55,32 @@ const fetchRelatedVideos = async (categoryId: string, videoId: string) => {
 };
 
 const VideoDetails = () => {
-  const { id } = useParams();
+  const { id, title } = useParams();
   const navigate = useNavigate();
   
   const { data: video, isLoading } = useQuery({
-    queryKey: ["video", id],
-    queryFn: () => fetchVideo(id!),
-    enabled: !!id,
+    queryKey: ["video", id, title],
+    queryFn: async () => {
+      if (id) {
+        return fetchVideoById(id);
+      } else if (title) {
+        return fetchVideoByTitle(title);
+      }
+      throw new Error("No id or title provided");
+    },
+    enabled: !!(id || title),
   });
 
   const { data: relatedVideos = [] } = useQuery({
-    queryKey: ["related-videos", video?.category_id, id],
-    queryFn: () => fetchRelatedVideos(video!.category_id, id!),
-    enabled: !!video?.category_id && !!id,
+    queryKey: ["related-videos", video?.category_id, video?.id],
+    queryFn: () => fetchRelatedVideos(video!.category_id, video!.id),
+    enabled: !!video?.category_id && !!video?.id,
   });
 
   const onDownload = (downloadUrl: string) => {
     // Use fake download page with the actual URL as target
-    const fakeDownloadUrl = `/download/${id}?target=${encodeURIComponent(downloadUrl)}`;
+    const videoId = video?.id || id;
+    const fakeDownloadUrl = `/download/${videoId}?target=${encodeURIComponent(downloadUrl)}`;
     window.open(fakeDownloadUrl, '_blank');
   };
 
@@ -106,7 +132,7 @@ const VideoDetails = () => {
       <Helmet>
         <title>{video.title} | VineVid</title>
         <meta name="description" content={video.description || `Watch ${video.title} - ${video.categories?.name} ${video.year}`} />
-        <link rel="canonical" href={`${location.origin}/video/${video.id}`} />
+        <link rel="canonical" href={`${location.origin}/${video.title.toLowerCase().replace(/\s+/g, '-')}`} />
       </Helmet>
       <Header />
       <main className="container py-8 space-y-10">

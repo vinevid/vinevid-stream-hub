@@ -60,6 +60,7 @@ const App = () => (
                   <Route path="/search" element={<SearchResults />} />
                   <Route path="/how-to-download" element={<HowToDownload />} />
                   <Route path="/video/:id" element={<VideoDetails />} />
+                  <Route path="/:title" element={<VideoDetails />} />
                   <Route path="/download/:id" element={<FakeDownload />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/dmca" element={<DMCA />} />

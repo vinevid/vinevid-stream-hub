@@ -7,7 +7,7 @@ const steps = [
   { icon: Download, title: "Click your episode", desc: "Open the movie or episode page you want." },
   { icon: Timer, title: "Wait for secure link", desc: "We prepare a safe, fast download URL." },
   { icon: ScanLine, title: "Wait for the countdown", desc: "Short wait to keep content free for everyone." },
-  { icon: CheckCircle2, title: "Download starts", desc: "Your file downloads automatically." },
+  { icon: CheckCircle2, title: "Wait for the redirection to the download page then click the download button at the top left of the page.", desc: "Your file downloads automatically." },
 ];
 
 const HowToDownload = () => {
